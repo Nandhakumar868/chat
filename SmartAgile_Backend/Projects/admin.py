@@ -7,7 +7,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_filter = ['organization' , 'status']
 
 class ProjectMembersAdmin(admin.ModelAdmin):
-    list_display = ['project', 'profile', 'role_within_project']
+    list_display = ['id','project', 'profile', 'role_within_project']
 
 admin.site.register(ProjectMembers, ProjectMembersAdmin)
 admin.site.register(Project , ProjectAdmin)

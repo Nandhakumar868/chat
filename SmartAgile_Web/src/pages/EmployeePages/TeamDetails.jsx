@@ -335,7 +335,7 @@
 // export default TeamDetails;
 
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
@@ -345,10 +345,12 @@ function TeamDetails() {
   const [projectDetails, setProjectDetails] = useState({});
   const [teamMembers, setTeamMembers] = useState([]);
   const [showTeamMembers, setShowTeamMembers] = useState(false);
+  const websocketRef = useRef(null);
 
   const goBack = () => {
     window.location.href = '/chat';
   };
+
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -378,9 +380,30 @@ function TeamDetails() {
     fetchProjectDetails();
   }, []);
 
+  const projectId = localStorage.getItem("project_id");
+  
+  useEffect(() => {
+    if(projectId){
+      const websocket = new WebSocket(`ws://127:0.0.1:8000/ws/chatroom/1`);
+      websocketRef.current = websocket;
+
+      websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setMessages((prevMessages) => [...prevMessages, {text:data.message, user:data.user}]);
+      };
+
+      websocket.onclose = () => {
+        console.log('Web socket connection closed');
+      };
+
+      return () => {
+        websocket.close();
+      }
+    }
+  })
+
   const fetchTeamMembers = async () => {
     try {
-      const projectId = localStorage.getItem("project_id");
       if (projectId) {
         const response = await fetch(`http://127.0.0.1:8000/projects/project-members/${projectId}`);
         const data = await response.json();
