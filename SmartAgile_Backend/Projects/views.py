@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
@@ -85,4 +86,10 @@ class UserProjectView(APIView):
         projects = Project.objects.filter(proj_members__profile__user=user).select_related('organization')
 
         serializer = ProjectSerializer(projects, many = True)
+        return Response(serializer.data)
+
+class ProjectMemberDetailView(APIView):
+    def get(self, request, id):
+        project_member = get_object_or_404(ProjectMembers, pk=id)
+        serializer = ProjectMemberSerializer(project_member)
         return Response(serializer.data)

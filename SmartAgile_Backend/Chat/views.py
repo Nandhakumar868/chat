@@ -6,7 +6,7 @@ from Projects.models import Project, ProjectMembers
 from Users.models import User
 from .serializers import ChatRoomSerializer, MessageSerializer
 from django.shortcuts import get_object_or_404
-from Projects.serializers import ProjectSerializer
+from Projects.serializers import ProjectSerializer, ProjectMemberSerializer
 import logging
 
 # Create your views here.
@@ -30,7 +30,7 @@ class CreateChatRoomView(APIView):
             return Response({'message' : 'Chatroom created successfully', 'chatroom' : serializer.data}, status=status.HTTP_201_CREATED)
         
         except Exception as e:
-            return Response({'message' : 'An error occured', 'error' : str(e)}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message' : 'An error occurred', 'error' : str(e)}, status=status.HTTP_404_NOT_FOUND)
         
 
 class UserChatRoomView(APIView):
@@ -47,17 +47,20 @@ class UserChatRoomView(APIView):
             chat_room_data = chat_room_serializer.data
 
             project_details = []
+            chat_room_id = []
             for chat_room in chat_room_data:
                 proj_id = chat_room['project']
-                # chatroom_id = chat_room['id']
                 project_detail = Project.objects.get(pk=proj_id)
                 proj_serializer = ProjectSerializer(project_detail)
                 project_details.append(proj_serializer.data)
+
+                chatroom_data = chat_room['id']
+                chat_room_id.append(chatroom_data)
         
-            return Response(project_details, status=status.HTTP_200_OK)
+            return Response({'chatroom_data' : chat_room_id,'project_details' : project_details}, status=status.HTTP_200_OK)
         
         except Exception as e:
-            return Response({'message' : 'An error occured', 'error' : str(e)}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message' : 'An error occurred', 'error' : str(e)}, status=status.HTTP_404_NOT_FOUND)
         
 
 class MessageListView(APIView):
@@ -65,7 +68,8 @@ class MessageListView(APIView):
         chatroom = get_object_or_404(ChatRoom, pk=chatroom_id)
         messages = chatroom.messages.all()
         serializer = MessageSerializer(messages, many = True)
-        return Response(serializer.data)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request, chatroom_id):
         chatroom = get_object_or_404(ChatRoom, pk=chatroom_id)
@@ -79,3 +83,4 @@ class MessageListView(APIView):
             serializer.save(chatroom=chatroom, sender=sender)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

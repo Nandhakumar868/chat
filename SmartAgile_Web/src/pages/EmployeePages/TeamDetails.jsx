@@ -335,7 +335,7 @@
 // export default TeamDetails;
 
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
 
@@ -345,25 +345,105 @@ function TeamDetails() {
   const [projectDetails, setProjectDetails] = useState({});
   const [teamMembers, setTeamMembers] = useState([]);
   const [showTeamMembers, setShowTeamMembers] = useState(false);
-  const websocketRef = useRef(null);
+  const websocket = useRef(null);
 
   const goBack = () => {
     window.location.href = '/chat';
   };
 
 
-  const sendMessage = (e) => {
+  // const sendMessage = (e) => {
+  //   e.preventDefault();
+  //   if (input.trim()) {
+  //     setMessages([...messages, { text: input, user: "self" }]);
+  //     setInput("");
+  //   }
+  // };
+
+  const userId = JSON.parse(localStorage.getItem('user_id'));
+  const chatroom_id = useMemo(() => JSON.parse(localStorage.getItem('chatroom_id')), []);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try{
+        const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages`)
+        const data = await response.json();;
+        setMessages(data);
+      }catch(e){
+        console.error('Error fetching messages', e);
+      }
+    };
+
+    fetchMessages();
+  }, [chatroom_id]);
+
+  useEffect(() => {
+    const socket = new WebSocket(`ws://127.0.0.1:8000/ws/chatroom/${chatroom_id}/`);
+
+    socket.onopen = () => {
+      console.log('Websocket connection established');
+    };
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      setMessages((prevMessages) => [...prevMessages, data]);
+    };
+
+    socket.onclose = (e) => {
+      console.log('Websocket connection closed', e);
+    };
+
+    socket.onerror = (error) => {
+      console.error('Websocket error', error);
+    };
+
+    websocket.current = socket;
+
+    return () => {
+      if(websocket.current){
+        websocket.current.close();
+      }
+    };
+  }, [chatroom_id]);
+
+  const sendMessage = async (e) => {
     e.preventDefault();
-    if (input.trim()) {
-      setMessages([...messages, { text: input, user: "self" }]);
-      setInput("");
+    if(input.trim() != ''){
+      const messageData = {
+        chatroom: chatroom_id,
+        sender : userId,
+        message : input,
+      };
+
+      if(websocket.current && websocket.current.readyState === WebSocket.OPEN){
+        websocket.current.send(JSON.stringify(messageData));
+      }else{
+        console.error('Websocket is not open');
+      }
+
+      try{
+        const res = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({messageData}),
+        });
+  
+        if(res.ok){
+          setInput('');
+        } 
+      }catch(e){
+        console.error('Error sending messages', e)
+      }
     }
-  };
+  }
+
+  const projectId = localStorage.getItem("project_id");
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
       try {
-        const projectId = localStorage.getItem("project_id");
         if (projectId) {
           const response = await fetch(`http://127.0.0.1:8000/projects/${projectId}`);
           const data = await response.json();
@@ -378,29 +458,8 @@ function TeamDetails() {
     };
 
     fetchProjectDetails();
-  }, []);
+  }, [projectId]);
 
-  const projectId = localStorage.getItem("project_id");
-  
-  useEffect(() => {
-    if(projectId){
-      const websocket = new WebSocket(`ws://127:0.0.1:8000/ws/chatroom/1`);
-      websocketRef.current = websocket;
-
-      websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setMessages((prevMessages) => [...prevMessages, {text:data.message, user:data.user}]);
-      };
-
-      websocket.onclose = () => {
-        console.log('Web socket connection closed');
-      };
-
-      return () => {
-        websocket.close();
-      }
-    }
-  })
 
   const fetchTeamMembers = async () => {
     try {
@@ -414,6 +473,7 @@ function TeamDetails() {
       console.error("Error fetching team members:", error);
     }
   };
+
 
   const handleTeamMemberClick = (username) => {
     setInput(`${input}@${username} `);
@@ -438,12 +498,12 @@ function TeamDetails() {
           <div
             key={index}
             className={`rounded p-2 my-2 max-w-xs ${
-              message.user === "self"
-                ? "bg-blue-300 ml-auto"
-                : "bg-gray-200 mr-auto"
+              message.sender_details_user === userId
+                ? "bg-red-300 ml-auto"
+                : "bg-green-100 mr-auto"
             }`}
           >
-            {message.text}
+            <strong className="text-black">{message.sender_details_username}</strong><p className="text-black">{message.message}</p>{message.sent_at}
           </div>
         ))}
       </div>

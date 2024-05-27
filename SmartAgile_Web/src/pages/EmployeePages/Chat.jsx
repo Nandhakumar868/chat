@@ -97,8 +97,11 @@ function Chat() {
           `http://127.0.0.1:8000/chat/chatroom/users/${userId}`
         );
         const data = await response.json();
+        const projectData = data.project_details
+        const chatroomData = data.chatroom_data
+        localStorage.setItem('chatroom_id', JSON.stringify(chatroomData));
 
-        const projectsWithFullIconPaths = data.map((project) => {
+        const projectsWithFullIconPaths = projectData.map((project) => {
           return {
             ...project,
             icon: `http://127.0.0.1:8000${project.icon}`, // Assuming the server serves static files at this URL
