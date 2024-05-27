@@ -90,6 +90,6 @@ class UserProjectView(APIView):
 
 class ProjectMemberDetailView(APIView):
     def get(self, request, id):
-        project_member = get_object_or_404(ProjectMembers, pk=id)
+        project_member = get_object_or_404(ProjectMembers, profile=id)
         serializer = ProjectMemberSerializer(project_member)
         return Response(serializer.data)

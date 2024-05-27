@@ -2,8 +2,11 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import ChatRoom, Message
 from Projects.models import ProjectMembers
-from channels.db import database_sync_to_async
 from .serializers import MessageSerializer
+import logging
+from asgiref.sync import sync_to_async
+
+logger = logging.getLogger(__name__)
 
 class ChatRoomConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -16,46 +19,64 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        logger.info(f"WebSocket connection established for chatroom: {self.chatroom_id}")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.chatroom_group_name,
             self.channel_name
         )
+        logger.info(f"WebSocket connection closed for chatroom: {self.chatroom_id}, close_code: {close_code}")
     
     async def receive(self, text_data):
-        data = json.loads(text_data)
-        message = data['message']
-        sender_id = data['sender']
+        logger.info(f"Received WebSocket message: {text_data}")
+        try:
+            data = json.loads(text_data)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding JSON: {e}")
+            return 
+        
+        message = data.get('message')
+        sender = data.get('sender')
 
-        sender = await database_sync_to_async(ProjectMembers.objects.get)(pk=sender_id)
-        chatroom = await database_sync_to_async(ChatRoom.objects.get)(pk=self.chatroom_id)
-
-        if sender.project != chatroom.project:
+        if message is None or sender is None:
+            logger.error("Message or sender is missing from the received data")
             return
         
-        message_instance = await database_sync_to_async(Message.objects.create)(
-            chatroom = chatroom,
-            sender = sender,
-            message = message
-        )
+        try:
+            sender = await sync_to_async(ProjectMembers.objects.get)(pk=sender)
+            chatroom = await sync_to_async(ChatRoom.objects.get)(pk=self.chatroom_id)
 
-        serializer = MessageSerializer(message_instance)
-        message_data = serializer.data
+            if sender.project != chatroom.project:
+                logger.warning(f"Sender project mismatch: {sender.project} vs {chatroom.project}")
+                return
+        
+            message_instance = sync_to_async(await Message.objects.create)(
+                chatroom = chatroom,
+                sender = sender,
+                message = message
+            ) 
 
-        await self.channel_layer.group_send(
-            self.chatroom_group_name,
-            {
-                'type' : 'chat_message',
-                'message' : message_data
-            }
-        )
+            serializer = MessageSerializer(message_instance)
+            message_data = serializer.data
+
+            await self.channel_layer.group_send(
+                self.chatroom_group_name,
+                {
+                    'type' : 'chat_message',
+                    'message' : message_data
+                }
+            )
+        except ProjectMembers.DoesNotExist:
+            logger.error(f"Sender with ID {sender} does not exist")
+        except ChatRoom.DoesNotExist:
+            logger.error(f"ChatRoom with ID {self.chatroom_id} does not exist")
+        except Exception as e:
+            logger.error(f"Error processing WebSocket message: {e}")
+            
 
     async def chat_message(self, event):
         message = event['message']
-        sender = event['sender']
 
-        await self.send(text_data=json.dumps({
-            'message' : message,
-            'sender' : sender
-        }))
+        await self.send(text_data=json.dumps(message))
+        logger.info(f"Sent WebSocket message: {message}")

@@ -73,7 +73,12 @@ class MessageListView(APIView):
     
     def post(self, request, chatroom_id):
         chatroom = get_object_or_404(ChatRoom, pk=chatroom_id)
-        sender = get_object_or_404(ProjectMembers, pk = request.data['sender'])
+
+        if 'sender' not in request.data:
+            return Response({'Sender not in request'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        sender_id = request.data['sender']
+        sender = get_object_or_404(ProjectMembers, pk = sender_id)
         
         if sender.project != chatroom.project:
             return Response({'error' : 'Sender is not a member of this project'}, status=status.HTTP_400_BAD_REQUEST)

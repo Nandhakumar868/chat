@@ -338,6 +338,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import Avatar from '@mui/material/Avatar';
 
 function TeamDetails() {
   const [messages, setMessages] = useState([]);
@@ -346,6 +347,7 @@ function TeamDetails() {
   const [teamMembers, setTeamMembers] = useState([]);
   const [showTeamMembers, setShowTeamMembers] = useState(false);
   const websocket = useRef(null);
+  const [projectMemberId, setProjectMemberId] = useState(null);
 
   const goBack = () => {
     window.location.href = '/chat';
@@ -361,14 +363,23 @@ function TeamDetails() {
   // };
 
   const userId = JSON.parse(localStorage.getItem('user_id'));
-  const chatroom_id = useMemo(() => JSON.parse(localStorage.getItem('chatroom_id')), []);
+  const chatroom_id = useMemo(() => {
+    const storedId = JSON.parse(localStorage.getItem('chatroom_id'));
+    return Array.isArray(storedId) ? storedId[0] : storedId;
+  }, []);
+  console.log(chatroom_id)
+
 
   useEffect(() => {
     const fetchMessages = async () => {
       try{
-        const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages`)
-        const data = await response.json();;
+        const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages/`)
+        const data = await response.json();
         setMessages(data);
+
+        const memberId = await fetch(`http://127.0.0.1:8000/projects/user-details/${userId}/`);
+        const datas = await memberId.json();
+        setProjectMemberId(datas.id);
       }catch(e){
         console.error('Error fetching messages', e);
       }
@@ -408,29 +419,33 @@ function TeamDetails() {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if(input.trim() != ''){
+    if (input.trim()) {
       const messageData = {
         chatroom: chatroom_id,
-        sender : userId,
-        message : input,
+        sender: projectMemberId,
+        message: input,
       };
 
-      if(websocket.current && websocket.current.readyState === WebSocket.OPEN){
+      if(websocket.current.readyState === WebSocket.OPEN){
         websocket.current.send(JSON.stringify(messageData));
+        console.log("Message sent", messageData);
       }else{
         console.error('Websocket is not open');
       }
 
       try{
-        const res = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages`, {
+        const res = await fetch(`http://localhost:8000/chat/chatroom/${chatroom_id}/messages/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({messageData}),
+          body: JSON.stringify(messageData),
         });
+
+        const resData = await res.json();
+        console.log(resData);
   
-        if(res.ok){
+        if(resData.ok){
           setInput('');
         } 
       }catch(e){
@@ -441,81 +456,79 @@ function TeamDetails() {
 
   const projectId = localStorage.getItem("project_id");
 
-  useEffect(() => {
-    const fetchProjectDetails = async () => {
-      try {
-        if (projectId) {
-          const response = await fetch(`http://127.0.0.1:8000/projects/${projectId}`);
-          const data = await response.json();
-          if (data.icon) {
-            data.icon = `http://127.0.0.1:8000${data.icon}`;
-          }
-          setProjectDetails(data);
-        }
-      } catch (error) {
-        console.error("Error fetching project details:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchProjectDetails = async () => {
+  //     try {
+  //       if (projectId) {
+  //         const response = await fetch(`http://127.0.0.1:8000/projects/${projectId}/`);
+  //         const data = await response.json();
+  //         if (data.icon) {
+  //           data.icon = `http://127.0.0.1:8000${data.icon}`;
+  //         }
+  //         setProjectDetails(data);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching project details:", error);
+  //     }
+  //   };
 
-    fetchProjectDetails();
-  }, [projectId]);
-
-
-  const fetchTeamMembers = async () => {
-    try {
-      if (projectId) {
-        const response = await fetch(`http://127.0.0.1:8000/projects/project-members/${projectId}`);
-        const data = await response.json();
-        setTeamMembers(data);
-        setShowTeamMembers(true);
-      }
-    } catch (error) {
-      console.error("Error fetching team members:", error);
-    }
-  };
+  //   fetchProjectDetails();
+  // }, [projectId]);
 
 
-  const handleTeamMemberClick = (username) => {
-    setInput(`${input}@${username} `);
-    setShowTeamMembers(false);
-  };
+  // const fetchTeamMembers = async () => {
+  //   try {
+  //     if (projectId) {
+  //       const response = await fetch(`http://127.0.0.1:8000/projects/project-members/${projectId}/`);
+  //       const data = await response.json();
+  //       setTeamMembers(data);
+  //       setShowTeamMembers(true);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching team members:", error);
+  //   }
+  // };
+
+
+  // const handleTeamMemberClick = (username) => {
+  //   setInput(`${input}@${username} `);
+  //   setShowTeamMembers(false);
+  // };
 
   return (
     <div className="flex border flex-col pr-2 pl-2 rounded-md h-screen">
        <div className="flex items-center justify-between pt-4 pl-4">
         <div className="flex items-center">
           <FontAwesomeIcon onClick={goBack} className="hover:text-gray-500" icon={faArrowLeft} size="md" />
-          {projectDetails && (
+          {/* {projectDetails && (
             <div className="flex items-center ml-2">
               <img src={projectDetails.icon} alt="Project Logo" className="w-10 h-10 ml-1 mr-4" />
               <span className="text-xl font-bold">{projectDetails.proj_name}</span>
             </div>
-          )}
+          )} */}
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 border-gray-300 bg-white">
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`rounded p-2 my-2 max-w-xs ${
-              message.sender_details_user === userId
-                ? "bg-red-300 ml-auto"
-                : "bg-green-100 mr-auto"
-            }`}
-          >
-            <strong className="text-black">{message.sender_details_username}</strong><p className="text-black">{message.message}</p>{message.sent_at}
+          <div key={index}>
+            <div className={`rounded p-2 my-2 max-w-xs ${
+              message.user_id === userId ? "bg-red-300 ml-auto" : "bg-green-100 mr-auto"}`}>
+            <Avatar src={`http://127.0.0.1:8000/media/${message.user_image}`} alt = {message.username}/>
+            <strong className="text-black">{message.username}</strong><p className="text-black">{message.message}</p>{message.sent_at}
           </div>
+          </div>
+          
         ))}
       </div>
       <form className="flex items-center pl-8 pr-12 pb-32 relative" onSubmit={sendMessage}>
         <div className="relative flex-grow">
-          <span
+          {/* <span
             className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-black-200"
             style={{ fontSize: '20px', fontWeight: 'bold' }}
             onClick={fetchTeamMembers}
           >
             @
-          </span>
+          </span> */}
           <input
             type="text"
             value={input}
@@ -523,7 +536,7 @@ function TeamDetails() {
             placeholder="Type a message..."
             className="w-full p-3 pl-9 bg-[#DBDBDB] border-none rounded-full focus:outline-none"
           />
-          {showTeamMembers && (
+          {/* {showTeamMembers && (
             <div className="absolute bottom-14 bg-white border border-gray-300 rounded-lg mt-2 max-h-32 overflow-y-auto w-48 z-10 p-2">
               {teamMembers.map(member => (
                 <div
@@ -535,7 +548,7 @@ function TeamDetails() {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
         </div>
         <button
           type="submit"
@@ -544,7 +557,7 @@ function TeamDetails() {
         >
           <FontAwesomeIcon icon={faPaperPlane} size="lg" />
         </button>
-      </form>
+      </form> 
     </div>
   );
 }

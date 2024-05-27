@@ -148,7 +148,7 @@ function TeamDetails() {
         </div>
         <button
           type="submit"
-          className="ml-2 bg-[#4D989D] hover:bg-blue-700 text-white rounded-full p-2"
+          className="ml-2 bg-[#3d4344] hover:bg-blue-700 text-white rounded-full p-2"
           style={{ outline: 'none' }}
         >
           <FontAwesomeIcon icon={faPaperPlane} size="lg" />
