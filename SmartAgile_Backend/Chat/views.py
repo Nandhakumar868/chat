@@ -86,6 +86,6 @@ class MessageListView(APIView):
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(chatroom=chatroom, sender=sender)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

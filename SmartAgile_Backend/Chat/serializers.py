@@ -46,3 +46,10 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'chatroom', 'sender', 'message', 'sent_at',  'user_id', 'username', 'user_image']
         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']
+
+class MessageViewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Message
+        fields = ['id', 'chatroom', 'sender', 'message', 'sent_at']
+        read_only_fields = ['sent_at']
