@@ -4,10 +4,11 @@ from rest_framework.response import Response
 from .models import ChatRoom, Message
 from Projects.models import Project, ProjectMembers
 from Users.models import User
-from .serializers import ChatRoomSerializer, MessageSerializer
+from .serializers import ChatRoomSerializer, MessageViewSerializer
 from django.shortcuts import get_object_or_404
 from Projects.serializers import ProjectSerializer, ProjectMemberSerializer
 import logging
+from asgiref.sync import sync_to_async
 
 # Create your views here.
 
@@ -67,7 +68,8 @@ class MessageListView(APIView):
     def get(self, request, chatroom_id):
         chatroom = get_object_or_404(ChatRoom, pk=chatroom_id)
         messages = chatroom.messages.all()
-        serializer = MessageSerializer(messages, many = True)
+        serializer = MessageViewSerializer(messages, many = True)
+
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -83,7 +85,7 @@ class MessageListView(APIView):
         if sender.project != chatroom.project:
             return Response({'error' : 'Sender is not a member of this project'}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = MessageSerializer(data=request.data)
+        serializer = MessageViewSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save(chatroom=chatroom, sender=sender)
             return Response(serializer.data, status=status.HTTP_200_OK)

@@ -428,34 +428,35 @@ function TeamDetails() {
       if(websocket.current.readyState === WebSocket.OPEN){
         websocket.current.send(JSON.stringify(messageData));
         console.log("Message sent", messageData);
+        setInput('');
       }else{
         console.error('Websocket is not open');
       }
 
-      try{
-        const res = await fetch(`http://localhost:8000/chat/chatroom/${chatroom_id}/messages/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(messageData),
-        });
+      // try{
+      //   const res = await fetch(`http://localhost:8000/chat/chatroom/${chatroom_id}/messages/`, {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify(messageData),
+      //   });
 
         
   
-        if(res.ok){
-          console.log('Hello');
-          const resData = await res.json();
-          console.log(resData);
-          const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages/`)
-          const data = await response.json();
-          setInput('');
-        } else{
-          console.error('Failed to fetch message');
-        }
-      }catch(e){
-        console.error('Error sending messages', e)
-      }
+      //   if(res.ok){
+      //     console.log('Hello');
+      //     const resData = await res.json();
+      //     console.log(resData);
+      //     // const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages/`)
+      //     // const data = await response.json();
+      //     setInput('');
+      //   } else{
+      //     console.error('Failed to fetch message');
+      //   }
+      // }catch(e){
+      //   console.error('Error sending messages', e)
+      // }
     }
   }
 

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import ChatRoom, Message
 from Projects.models import ProjectMembers
 from Projects.serializers import ProjectMemberSerializer
+from asgiref.sync import sync_to_async
 
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,6 +12,29 @@ class ChatRoomSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     # sender_details = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    user_image = serializers.SerializerMethodField()
+    
+    def get_user_id(self, obj):
+        sender_details = self.context.get('sender_details')
+        return sender_details.get('user') if sender_details else None
+
+    def get_username(self, obj):
+        sender_details = self.context.get('sender_details')
+        return sender_details.get('username') if sender_details else None
+
+    def get_user_image(self, obj):
+        sender_details = self.context.get('sender_details')
+        return sender_details.get('image') if sender_details else None
+    
+    class Meta:
+        model = Message
+        fields = ['id', 'chatroom', 'sender', 'message', 'sent_at',  'user_id', 'username', 'user_image']
+        read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']
+
+class MessageViewSerializer(serializers.ModelSerializer):
+
     user_id = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     user_image = serializers.SerializerMethodField()
@@ -47,9 +71,15 @@ class MessageSerializer(serializers.ModelSerializer):
         fields = ['id', 'chatroom', 'sender', 'message', 'sent_at',  'user_id', 'username', 'user_image']
         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']
 
-class MessageViewSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model = Message
-        fields = ['id', 'chatroom', 'sender', 'message', 'sent_at']
-        read_only_fields = ['sent_at']
+# In your view or consumer
+# In your serializer
+# class MessageSerializer(serializers.ModelSerializer):
+#     user_id = serializers.IntegerField()
+#     username = serializers.CharField()
+#     user_image = serializers.CharField()
+
+#     class Meta:
+#         model = Message
+#         fields = ['id', 'chatroom', 'sender', 'message', 'sent_at', 'user_id', 'username', 'user_image']
+#         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']
