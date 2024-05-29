@@ -34,6 +34,25 @@ class CreateChatRoomView(APIView):
             return Response({'message' : 'An error occurred', 'error' : str(e)}, status=status.HTTP_404_NOT_FOUND)
         
 
+class GetChatRoomView(APIView):
+    def get(self, request, proj_id):
+        try:
+            project = get_object_or_404(Project, pk=proj_id)
+            print(proj_id)
+            print(project)
+
+            if hasattr(project, 'chatroom'):
+                print("Chat room attribute not found for project.", project)
+                return Response({'message' : 'Chatroom for the project does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            
+            chat_room = project.chat_room
+            print("chat_room", chat_room)
+            serializer = ChatRoomSerializer(chat_room)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'message' : 'An error occurred', 'error' : str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
 class UserChatRoomView(APIView):
 
     def get(self, request, user_id):
@@ -73,21 +92,21 @@ class MessageListView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-    def post(self, request, chatroom_id):
-        chatroom = get_object_or_404(ChatRoom, pk=chatroom_id)
+    # def post(self, request, chatroom_id):
+    #     chatroom = get_object_or_404(ChatRoom, pk=chatroom_id)
 
-        if 'sender' not in request.data:
-            return Response({'Sender not in request'}, status=status.HTTP_400_BAD_REQUEST)
+    #     if 'sender' not in request.data:
+    #         return Response({'Sender not in request'}, status=status.HTTP_400_BAD_REQUEST)
         
-        sender_id = request.data['sender']
-        sender = get_object_or_404(ProjectMembers, pk = sender_id)
+    #     sender_id = request.data['sender']
+    #     sender = get_object_or_404(ProjectMembers, pk = sender_id)
         
-        if sender.project != chatroom.project:
-            return Response({'error' : 'Sender is not a member of this project'}, status=status.HTTP_400_BAD_REQUEST)
+    #     if sender.project != chatroom.project:
+    #         return Response({'error' : 'Sender is not a member of this project'}, status=status.HTTP_400_BAD_REQUEST)
         
-        serializer = MessageViewSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(chatroom=chatroom, sender=sender)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     serializer = MessageViewSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save(chatroom=chatroom, sender=sender)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     

@@ -81,10 +81,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import TeamDetails from "./TeamDetails";
 
 function Chat() {
   const navigate = useNavigate();
   const [userProjects, setUserProjects] = useState([]);
+  const [chatroomId, setChatroomId] = useState(null);
 
   useEffect(() => {
     const fetchUserProjects = async () => {
@@ -98,8 +100,8 @@ function Chat() {
         );
         const data = await response.json();
         const projectData = data.project_details
-        const chatroomData = data.chatroom_data
-        localStorage.setItem('chatroom_id', JSON.stringify(chatroomData));
+        // const chatroomData = data.chatroom_data
+        // localStorage.setItem('chatroom_id', JSON.stringify(chatroomData));
 
         const projectsWithFullIconPaths = projectData.map((project) => {
           return {
@@ -121,10 +123,13 @@ function Chat() {
     // };
   }, []);
 
-  const handleProjectClick = (projectId) => {
+
+  const handleProjectClick = async (projectId) => {
     // Update local storage with the clicked project ID
     localStorage.setItem("project_id", projectId);
-    // Navigate to the project details page
+    const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/get/${projectId}/`);
+    const data = await response.json();
+    localStorage.setItem('chatroom_id', JSON.stringify(data.id));
     navigate(`/chat/${projectId}`);
   };
 

@@ -43,7 +43,6 @@ class ChatRoomConsumer(AsyncWebsocketConsumer):
                     sender_details = await self.get_sender_details(message_instance.sender.id)
                     if sender_details:
                         message_data = self.serialize_message(message_instance, sender_details)
-                        print(message_data)
                         await self.channel_layer.group_send(
                             self.chatroom_group_name,
                             {

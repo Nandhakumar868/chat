@@ -12,5 +12,5 @@ urlpatterns = [
 
     path('user-projects/<int:user_id>/', UserProjectView.as_view(), name='user_projects'),
 
-    path('user-details/<int:id>/', ProjectMemberDetailView.as_view(), name='user-details'),
+    path('user-details/<int:id>/<int:proj_id>/', ProjectMemberDetailView.as_view(), name='user-details'),
 ]

@@ -348,6 +348,7 @@ function TeamDetails() {
   const [showTeamMembers, setShowTeamMembers] = useState(false);
   const websocket = useRef(null);
   const [projectMemberId, setProjectMemberId] = useState(null);
+  const messagesEndRef = useRef(null);
 
   const goBack = () => {
     window.location.href = '/chat';
@@ -363,10 +364,18 @@ function TeamDetails() {
   // };
 
   const userId = JSON.parse(localStorage.getItem('user_id'));
-  const chatroom_id = useMemo(() => {
-    const storedId = JSON.parse(localStorage.getItem('chatroom_id'));
-    return Array.isArray(storedId) ? storedId[0] : storedId;
-  }, []);
+  const chatroom_id = JSON.parse(localStorage.getItem('chatroom_id'));
+  // const chatroom_id = useMemo(() => {
+  //   const storedId = JSON.parse(localStorage.getItem('chatroom_id'));
+  //   return Array.isArray(storedId) ? storedId[0] : storedId;
+  // }, []);
+  const projectId = localStorage.getItem("project_id");
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({bottom: 0,  behavior: 'smooth' });
+    }
+  };
 
 
   useEffect(() => {
@@ -375,10 +384,17 @@ function TeamDetails() {
         const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages/`)
         const data = await response.json();
         setMessages(data);
+        scrollToBottom();
 
-        const memberId = await fetch(`http://127.0.0.1:8000/projects/user-details/${userId}/`);
+        const memberId = await fetch(`http://127.0.0.1:8000/projects/user-details/${userId}/${projectId}/`);
         const memberIdData = await memberId.json();
-        setProjectMemberId(memberIdData.id);
+        if (Array.isArray(memberIdData) && memberIdData.length > 0) {
+          const firstMemberData = memberIdData[0];
+          const memberId = firstMemberData.id;
+          setProjectMemberId(memberId);
+        } else {
+          console.log('Error getting Project Member id');
+        }
       }catch(e){
         console.error('Error fetching messages', e);
       }
@@ -416,9 +432,13 @@ function TeamDetails() {
     };
   }, [chatroom_id]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (input.trim()) {
+    if (input.trim() !=='') {
       const messageData = {
         chatroom: chatroom_id,
         sender: projectMemberId,
@@ -428,7 +448,7 @@ function TeamDetails() {
       if(websocket.current.readyState === WebSocket.OPEN){
         websocket.current.send(JSON.stringify(messageData));
         console.log("Message sent", messageData);
-        setInput('');
+        setInput('');        
       }else{
         console.error('Websocket is not open');
       }
@@ -460,7 +480,6 @@ function TeamDetails() {
     }
   }
 
-  const projectId = localStorage.getItem("project_id");
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -519,12 +538,14 @@ function TeamDetails() {
           <div key={index}>
             <div className={`rounded p-2 my-2 max-w-xs ${
               message.user_id === userId ? "bg-red-300 ml-auto" : "bg-green-100 mr-auto"}`}>
-            <Avatar src={`http://127.0.0.1:8000/media/${message.user_image}`} alt = {message.username}/>
-            <strong className="text-black">{message.username}</strong><p className="text-black">{message.message}</p>{message.sent_at}
+              <Avatar src={`http://127.0.0.1:8000/media/${message.user_image}`} alt={message.username} />
+              <strong className="text-black">{message.username}</strong>
+              <p className="text-black">{message.message}</p>
+              {message.sent_at}
+            </div>
           </div>
-          </div>
-          
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <form className="flex items-center pl-8 pr-12 pb-32 relative" onSubmit={sendMessage}>
         <div className="relative flex-grow">

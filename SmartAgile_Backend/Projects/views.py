@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema
 from .serializers import ProjectSerializer , ProjectMemberSerializer
 from rest_framework.views import APIView
 from .models import Project , ProjectMembers
-from Users.models import User
+from Users.models import User, UserProfile
 from rest_framework.decorators import api_view
 # from rest_framework.generics import ListCreateAPIView ,RetrieveUpdateDestroyAPIView
 
@@ -89,7 +89,22 @@ class UserProjectView(APIView):
         return Response(serializer.data)
 
 class ProjectMemberDetailView(APIView):
-    def get(self, request, id):
-        project_member = get_object_or_404(ProjectMembers, profile=id)
-        serializer = ProjectMemberSerializer(project_member)
-        return Response(serializer.data)
+    def get(self, request, proj_id, id):
+        try:
+            # Get the UserProfile instance corresponding to the provided user ID
+            user_profile = UserProfile.objects.get(user=id)
+
+            # Filter ProjectMembers instances associated with the user profile and project
+            project_member = ProjectMembers.objects.filter(profile=user_profile, project=proj_id)
+
+            # Check if any matching ProjectMembers instances exist
+            if not project_member.exists():
+                return Response({'message': 'Project members not found for the specified project'}, status=status.HTTP_404_NOT_FOUND)
+            
+            # Serialize the ProjectMembers instances
+            serializer = ProjectMemberSerializer(project_member, many=True)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'message': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        except ProjectMembers.DoesNotExist:
+            return Response({'message': 'Project members not found'}, status=status.HTTP_404_NOT_FOUND)
