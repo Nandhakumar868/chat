@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 } */
+.self-message {
+  border-radius:  0.5rem 0 0.5rem 0.5rem ; /* Sharp top-right corner, other corners rounded */
+}
+
+.other-message {
+  border-radius: 0.5rem; /* All corners rounded */
+}

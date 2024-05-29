@@ -70,16 +70,3 @@ class MessageViewSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'chatroom', 'sender', 'message', 'sent_at',  'user_id', 'username', 'user_image']
         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']
-
-
-# In your view or consumer
-# In your serializer
-# class MessageSerializer(serializers.ModelSerializer):
-#     user_id = serializers.IntegerField()
-#     username = serializers.CharField()
-#     user_image = serializers.CharField()
-
-#     class Meta:
-#         model = Message
-#         fields = ['id', 'chatroom', 'sender', 'message', 'sent_at', 'user_id', 'username', 'user_image']
-#         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']

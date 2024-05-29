@@ -1,344 +1,8 @@
-// import React, { useState } from "react";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-
-// function TeamDetails() {
-//   const [messages, setMessages] = useState([]);
-//   const [input, setInput] = useState("");
-
-//   const sendMessage = (e) => {
-//     e.preventDefault();
-//     if (input.trim()) {
-//       setMessages([...messages, { text: input, user: "self" }]);
-//       setInput("");
-//     }
-//   };
-
-//   return (
-//     <div className="  border border-gray-300 rounded-md  w-full h-full pt-2 pl-3 pr-3 pb-2">
-//       <div className="h-80 overflow-y-auto p-4 border-gray-300 mb-4 bg-white">
-//         {messages.map((message, index) => (
-//           <div
-//             key={index}
-//             className={`rounded p-2 my-2 max-w-xs ${
-//               message.user === "self"
-//                 ? "bg-blue-300 ml-auto"
-//                 : "bg-gray-200 mr-auto"
-//             }`}
-//           >
-//             {message.text}
-//           </div>
-//         ))}
-//       </div>
-//       <form className="flex items-center" onSubmit={sendMessage}>
-//         <div className="relative flex-grow">
-//           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-200"  style={{ fontSize: '20px', fontWeight: 'bold' }}>@</span>
-//           <input
-//             type="text"
-//             value={input}
-//             onChange={(e) => setInput(e.target.value)}
-//             placeholder="Type a message..."
-//             className="w-full p-2 pl-9 bg-[#DBDBDB] border border-gray-300 rounded-full focus:outline-none"
-//           />
-//         </div>
-//         <button
-//           type="submit"
-//           className="ml-2 bg-[#4D989D] hover:bg-blue-700 text-white"
-//           style={{
-//             width: '48px',
-//             height: '48px',
-//             borderRadius: '50%',
-//             display: 'flex',
-//             justifyContent: 'center',
-//             alignItems: 'center',
-//             outline: 'none'
-//           }}
-//         >
-//           <FontAwesomeIcon icon={faPaperPlane} size="lg" />
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default TeamDetails;
-
-
-// import React, { useState } from "react";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-
-// function TeamDetails() {
-//   const [messages, setMessages] = useState([]);
-//   const [input, setInput] = useState("");
-
-//   const goBack = () => {
-//     window.location.href = '/chat';
-//   };
-
-//   const sendMessage = (e) => {
-//     e.preventDefault();
-//     if (input.trim()) {
-//       setMessages([...messages, { text: input, user: "self" }]);
-//       setInput("");
-//     }
-//   };
-
-//   return (
-//     <div className="flex border flex-col pr-2 pl-2 rounded-md h-screen">
-//        <div className="flex items-center justify-between pt-4 pl-4">
-//         <div>
-          
-//             <FontAwesomeIcon onClick={goBack} className="hover:text-gray-500" icon={faArrowLeft} size="md" />
-         
-//         </div>
-//         <div className="text-lg font-semibold">Chat</div>
-//         <div></div>
-//       </div>
-//       <div className="flex-1 overflow-y-auto p-4 border-gray-300 bg-white">
-//         {messages.map((message, index) => (
-//           <div
-//             key={index}
-//             className={`rounded p-2 my-2 max-w-xs ${
-//               message.user === "self"
-//                 ? "bg-blue-300 ml-auto"
-//                 : "bg-gray-200 mr-auto"
-//             }`}
-//           >
-//             {message.text}
-//           </div>
-//         ))}
-//       </div>
-//       <form className="flex items-center pl-8 pr-12  pb-32 " onSubmit={sendMessage}>
-//         <div className="relative flex-grow">
-//           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-black-200" style={{ fontSize: '20px', fontWeight: 'bold' }}>@</span>
-//           <input
-//             type="text"
-//             value={input}
-//             onChange={(e) => setInput(e.target.value)}
-//             placeholder="Type a message..."
-//             className="w-full p-3 pl-9 bg-[#DBDBDB] border-none rounded-full focus:outline-none"
-//           />
-//         </div>
-//         <button
-//           type="submit"
-//           className="ml-2 bg-[#4D989D] hover:bg-blue-700 text-white rounded-full p-2"
-//           style={{ outline: 'none' }}
-//         >
-//           <FontAwesomeIcon icon={faPaperPlane} size="lg" />
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default TeamDetails;
-
-
-
-
-// import React, { useState, useEffect } from "react";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-
-// function TeamDetails() {
-//   const [messages, setMessages] = useState([]);
-//   const [input, setInput] = useState("");
-//   const [projectDetails, setProjectDetails] = useState({});
-
-//   const goBack = () => {
-//     window.location.href = '/chat';
-//   };
-
-//   const sendMessage = (e) => {
-//     e.preventDefault();
-//     if (input.trim()) {
-//       setMessages([...messages, { text: input, user: "self" }]);
-//       setInput("");
-//     }
-//   };
-
-//   useEffect(() => {
-//     const fetchProjectDetails = async () => {
-//       try {
-//         // Retrieve project_id from local storage
-//         const projectId = localStorage.getItem("project_id");
-//         if (projectId) {
-//           // Fetch project details using the project_id
-//           const response = await fetch(`http://127.0.0.1:8000/projects/${projectId}`);
-//           const data = await response.json();
-//           // Assuming the icon URL is available in the project details response
-//           if (data.icon) {
-//             data.icon = `http://127.0.0.1:8000${data.icon}`; // Assuming the server serves static files at this URL
-//           }
-//           setProjectDetails(data);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching project details:", error);
-//       }
-//     };
-
-//     fetchProjectDetails();
-//   }, []);
-
-//   return (
-//     <div className="flex border flex-col pr-2 pl-2 rounded-md h-screen">
-//        <div className="flex items-center justify-between pt-4 pl-4">
-//         <div>
-//           <FontAwesomeIcon onClick={goBack} className="hover:text-gray-500" icon={faArrowLeft} size="md" />
-//           {projectDetails && (
-//             <div className="flex items-center ml-2">
-//               <img src={projectDetails.icon} alt="Project Logo" className="w-8 h-8 mr-2" />
-//               <span className="text-lg font-semibold">{projectDetails.proj_name}</span>
-//             </div>
-//           )}
-//         </div>
-        
-//         <div></div>
-//       </div>
-//       <div className="flex-1 overflow-y-auto p-4 border-gray-300 bg-white">
-//         {messages.map((message, index) => (
-//           <div
-//             key={index}
-//             className={`rounded p-2 my-2 max-w-xs ${
-//               message.user === "self"
-//                 ? "bg-blue-300 ml-auto"
-//                 : "bg-gray-200 mr-auto"
-//             }`}
-//           >
-//             {message.text}
-//           </div>
-//         ))}
-//       </div>
-//       <form className="flex items-center pl-8 pr-12  pb-32 " onSubmit={sendMessage}>
-//         <div className="relative flex-grow">
-//           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-black-200" style={{ fontSize: '20px', fontWeight: 'bold' }}>@</span>
-//           <input
-//             type="text"
-//             value={input}
-//             onChange={(e) => setInput(e.target.value)}
-//             placeholder="Type a message..."
-//             className="w-full p-3 pl-9 bg-[#DBDBDB] border-none rounded-full focus:outline-none"
-//           />
-//         </div>
-//         <button
-//           type="submit"
-//           className="ml-2 bg-[#4D989D] hover:bg-blue-700 text-white rounded-full p-2"
-//           style={{ outline: 'none' }}
-//         >
-//           <FontAwesomeIcon icon={faPaperPlane} size="lg" />
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default TeamDetails;
-
-
-// import React, { useState, useEffect } from "react";
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-
-// function TeamDetails() {
-//   const [messages, setMessages] = useState([]);
-//   const [input, setInput] = useState("");
-//   const [projectDetails, setProjectDetails] = useState({});
-
-//   const goBack = () => {
-//     window.location.href = '/chat';
-//   };
-
-//   const sendMessage = (e) => {
-//     e.preventDefault();
-//     if (input.trim()) {
-//       setMessages([...messages, { text: input, user: "self" }]);
-//       setInput("");
-//     }
-//   };
-
-//   useEffect(() => {
-//     const fetchProjectDetails = async () => {
-//       try {
-//         // Retrieve project_id from local storage
-//         const projectId = localStorage.getItem("project_id");
-//         if (projectId) {
-//           // Fetch project details using the project_id
-//           const response = await fetch(`http://127.0.0.1:8000/projects/${projectId}`);
-//           const data = await response.json();
-//           // Assuming the icon URL is available in the project details response
-//           if (data.icon) {
-//             data.icon = `http://127.0.0.1:8000${data.icon}`; // Assuming the server serves static files at this URL
-//           }
-//           setProjectDetails(data);
-//         }
-//       } catch (error) {
-//         console.error("Error fetching project details:", error);
-//       }
-//     };
-
-//     fetchProjectDetails();
-//   }, []);
-
-//   return (
-//     <div className="flex border flex-col pr-2 pl-2 rounded-md h-screen">
-//        <div className="flex items-center justify-between pt-4 pl-4">
-//         <div className="flex items-center">
-//           <FontAwesomeIcon onClick={goBack} className="hover:text-gray-500" icon={faArrowLeft} size="md" />
-//           {projectDetails && (
-//             <div className="flex items-center ml-2">
-//               <img src={projectDetails.icon} alt="Project Logo" className="w-10 h-10 ml-1 mr-4" />
-//               <span className="text-xl font-bold">{projectDetails.proj_name}</span>
-//             </div>
-//           )}
-//         </div>
-        
-//         <div></div>
-//       </div>
-//       <div className="flex-1 overflow-y-auto p-4 border-gray-300 bg-white">
-//         {messages.map((message, index) => (
-//           <div
-//             key={index}
-//             className={`rounded p-2 my-2 max-w-xs ${
-//               message.user === "self"
-//                 ? "bg-blue-300 ml-auto"
-//                 : "bg-gray-200 mr-auto"
-//             }`}
-//           >
-//             {message.text}
-//           </div>
-//         ))}
-//       </div>
-//       <form className="flex items-center pl-8 pr-12  pb-32 " onSubmit={sendMessage}>
-//         <div className="relative flex-grow">
-//           <span className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-black-200" style={{ fontSize: '20px', fontWeight: 'bold' }}>@</span>
-//           <input
-//             type="text"
-//             value={input}
-//             onChange={(e) => setInput(e.target.value)}
-//             placeholder="Type a message..."
-//             className="w-full p-3 pl-9 bg-[#DBDBDB] border-none rounded-full focus:outline-none"
-//           />
-//         </div>
-//         <button
-//           type="submit"
-//           className="ml-2 bg-[#4D989D] hover:bg-blue-700 text-white rounded-full p-2"
-//           style={{ outline: 'none' }}
-//         >
-//           <FontAwesomeIcon icon={faPaperPlane} size="lg" />
-//         </button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default TeamDetails;
-
-
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faPaperPlane,faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import Avatar from '@mui/material/Avatar';
+import '../../App.css';
 
 function TeamDetails() {
   const [messages, setMessages] = useState([]);
@@ -349,26 +13,35 @@ function TeamDetails() {
   const websocket = useRef(null);
   const [projectMemberId, setProjectMemberId] = useState(null);
   const messagesEndRef = useRef(null);
+  const [maxWidth, setMaxWidth] = useState(0);
+  const dropdownRef = useRef(null);
+  const [file, setFile] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null); // State to hold the selected message
+  const [showOptions, setShowOptions] = useState(false);
+
 
   const goBack = () => {
     window.location.href = '/chat';
   };
+  const backendUrl = 'http://127.0.0.1:8000';
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
 
-  // const sendMessage = (e) => {
-  //   e.preventDefault();
-  //   if (input.trim()) {
-  //     setMessages([...messages, { text: input, user: "self" }]);
-  //     setInput("");
-  //   }
-  // };
+    const handleImageClick = (imageUrl) => {
+      setSelectedImage(imageUrl);
+    };
+    
+    const handleCloseImage = () => {
+      setSelectedImage(null);
+    };
+  };
+
 
   const userId = JSON.parse(localStorage.getItem('user_id'));
   const chatroom_id = JSON.parse(localStorage.getItem('chatroom_id'));
-  // const chatroom_id = useMemo(() => {
-  //   const storedId = JSON.parse(localStorage.getItem('chatroom_id'));
-  //   return Array.isArray(storedId) ? storedId[0] : storedId;
-  // }, []);
   const projectId = localStorage.getItem("project_id");
 
   const scrollToBottom = () => {
@@ -381,12 +54,12 @@ function TeamDetails() {
   useEffect(() => {
     const fetchMessages = async () => {
       try{
-        const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages/`)
+        const response = await fetch(`${backendUrl}/chat/chatroom/${chatroom_id}/messages/`)
         const data = await response.json();
         setMessages(data);
         scrollToBottom();
 
-        const memberId = await fetch(`http://127.0.0.1:8000/projects/user-details/${userId}/${projectId}/`);
+        const memberId = await fetch(`${backendUrl}/projects/user-details/${userId}/${projectId}/`);
         const memberIdData = await memberId.json();
         if (Array.isArray(memberIdData) && memberIdData.length > 0) {
           const firstMemberData = memberIdData[0];
@@ -452,31 +125,6 @@ function TeamDetails() {
       }else{
         console.error('Websocket is not open');
       }
-
-      // try{
-      //   const res = await fetch(`http://localhost:8000/chat/chatroom/${chatroom_id}/messages/`, {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(messageData),
-      //   });
-
-        
-  
-      //   if(res.ok){
-      //     console.log('Hello');
-      //     const resData = await res.json();
-      //     console.log(resData);
-      //     // const response = await fetch(`http://127.0.0.1:8000/chat/chatroom/${chatroom_id}/messages/`)
-      //     // const data = await response.json();
-      //     setInput('');
-      //   } else{
-      //     console.error('Failed to fetch message');
-      //   }
-      // }catch(e){
-      //   console.error('Error sending messages', e)
-      // }
     }
   }
 
@@ -485,10 +133,10 @@ function TeamDetails() {
     const fetchProjectDetails = async () => {
       try {
         if (projectId) {
-          const response = await fetch(`http://127.0.0.1:8000/projects/${projectId}/`);
+          const response = await fetch(`${backendUrl}/projects/${projectId}/`);
           const data = await response.json();
           if (data.icon) {
-            data.icon = `http://127.0.0.1:8000${data.icon}`;
+            data.icon = `${backendUrl}${data.icon}`;
           }
           setProjectDetails(data);
         }
@@ -504,7 +152,7 @@ function TeamDetails() {
   const fetchTeamMembers = async () => {
     try {
       if (projectId) {
-        const response = await fetch(`http://127.0.0.1:8000/projects/project-members/${projectId}/`);
+        const response = await fetch(`${backendUrl}/projects/project-members/${projectId}/`);
         const data = await response.json();
         setTeamMembers(data);
         setShowTeamMembers(true);
@@ -520,6 +168,27 @@ function TeamDetails() {
     setShowTeamMembers(false);
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowTeamMembers(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
+
+  // Calculate max width with slight delay to allow re-rendering
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMaxWidth(Math.min(window.innerWidth * 0.5, 500)); // Adjust 500 as desired max width
+    }, 100); // Adjust delay as needed
+    return () => clearTimeout(timer);
+  }, [messages]);
+
   return (
     <div className="flex border flex-col pr-2 pl-2 rounded-md h-screen">
        <div className="flex items-center justify-between pt-4 pl-4">
@@ -534,15 +203,45 @@ function TeamDetails() {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto p-4 border-gray-300 bg-white">
-        {messages.map((message, index) => (
+        {/* {messages.map((message, index) => (
           <div key={index}>
             <div className={`rounded p-2 my-2 max-w-xs ${
-              message.user_id === userId ? "bg-red-300 ml-auto" : "bg-green-100 mr-auto"}`}>
+              message.user_id === userId ? "bg-yellow-200 ml-auto rounded-lg rounded-tr-none mr-8 self-message" : "bg-[#4D989D] mr-auto rounded-lg rounded-tl-none ml-8 other-message"}`}>
               <Avatar src={`http://127.0.0.1:8000/media/${message.user_image}`} alt={message.username} />
               <strong className="text-black">{message.username}</strong>
               <p className="text-black">{message.message}</p>
               {message.sent_at}
             </div>
+          </div>
+        ))} */}
+        {messages.map((message, index) => (
+          <div key={index} className="mb-4">
+            {message.user_id === userId
+            ? <div className="flex items-center justify-end mb-1">
+              <div className="flex items-center">
+                <span className="text-sm font-bold mr-2">You</span>
+                <Avatar src={`${backendUrl}/media/${message.user_image}`} alt={message.username} />
+              </div>
+            </div>
+            : <div className="flex items-center justify-start mb-1">
+            <div className="flex items-center">
+              <Avatar src={`${backendUrl}/media/${message.user_image}`} alt={message.username} />
+              <span className="text-sm font-bold ml-2">{message.username}</span>
+            </div>
+          </div>
+            }
+            <div className={`rounded p-2 ${
+                message.user_id === userId
+                  ? "bg-[#D9D9D9] ml-auto rounded-lg rounded-tr-none mr-8 self-message"
+                  : "bg-[#4D989D] mr-auto rounded-lg rounded-tl-none ml-8 other-message"
+              }`}
+              style={{
+                justifySelf: message.user_id === userId ? 'flex-end' : 'flex-start',
+                minWidth: '50px', // Set a minimum width for the message bubble
+                width: 'max-content', // Set a fixed width for all messages, adjust as needed
+                maxWidth: `${maxWidth}px`,
+                position: 'relative',
+              }}><div className="mt-1">{message.message}</div></div>
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -563,6 +262,18 @@ function TeamDetails() {
             placeholder="Type a message..."
             className="w-full p-3 pl-9 bg-[#DBDBDB] border-none rounded-full focus:outline-none"
           />
+          <div className="absolute right-6 top-1/2 transform -translate-y-1/2 cursor-pointer">
+            <label htmlFor="fileInput">
+              <FontAwesomeIcon icon={faPaperclip} size="lg" className="text-gray-700 hover:text-gray-900" />
+              <input
+                type="file"
+                id="fileInput"
+                style={{ display: 'none' }}
+                accept=".docx,.doc,.pdf,.xls,.ppt,image/*"
+                onChange={handleFileChange}
+              />
+            </label>
+          </div>
           {showTeamMembers && (
             <div className="absolute bottom-14 bg-white border border-gray-300 rounded-lg mt-2 max-h-32 overflow-y-auto w-48 z-10 p-2">
               {teamMembers.map(member => (
@@ -571,7 +282,10 @@ function TeamDetails() {
                   className="p-2 hover:bg-gray-200 cursor-pointer"
                   onClick={() => handleTeamMemberClick(member.username)}
                 >
-                  {member.username}
+                  <div className="flex items-center">
+                    <Avatar src={`${backendUrl}/media/${member.image}`} alt={member.username} sx={{width: 26, height: 26}}/>
+                    <span className="ml-3">{member.username}</span>
+                  </div>
                 </div>
               ))}
             </div>
