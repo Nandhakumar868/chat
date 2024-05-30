@@ -9,5 +9,6 @@ class ChatRoom(models.Model):
 class Message(models.Model):
     chatroom = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(ProjectMembers, on_delete=models.CASCADE, related_name='sender_messages')
-    message = models.TextField()
+    message = models.TextField(blank=True, null=True)
+    file = models.FileField(upload_to='message-attachments/', blank=True, null=True)
     sent_at = models.DateTimeField(auto_now_add=True)

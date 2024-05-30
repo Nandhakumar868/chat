@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faPaperPlane,faPaperclip } from '@fortawesome/free-solid-svg-icons';
 import Avatar from '@mui/material/Avatar';
@@ -25,20 +25,6 @@ function TeamDetails() {
     window.location.href = '/chat';
   };
   const backendUrl = 'http://127.0.0.1:8000';
-
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-
-    const handleImageClick = (imageUrl) => {
-      setSelectedImage(imageUrl);
-    };
-    
-    const handleCloseImage = () => {
-      setSelectedImage(null);
-    };
-  };
-
 
   const userId = JSON.parse(localStorage.getItem('user_id'));
   const chatroom_id = JSON.parse(localStorage.getItem('chatroom_id'));
@@ -118,16 +104,48 @@ function TeamDetails() {
         message: input,
       };
 
-      if(websocket.current.readyState === WebSocket.OPEN){
-        websocket.current.send(JSON.stringify(messageData));
-        console.log("Message sent", messageData);
-        setInput('');        
+      if(file){
+        const reader = new FileReader();
+        reader.onload = function(event){
+          const base64File = event.target.result.split('.')[1];
+          messageData.file = base64File;
+          messageData.file_name = file.name;
+          sendToWebSocket(messageData);
+        };
+        reader.readAsDataURL(file);
       }else{
-        console.error('Websocket is not open');
+        sendToWebSocket(messageData);
       }
+
+      setInput('');
+      setFile(null);
+    }
+  };
+
+  const sendToWebSocket = (messageData) => {
+    if(websocket.current.readyState === WebSocket.OPEN){
+      websocket.current.send(JSON.stringify(messageData));
+      console.log("Message sent", messageData);
+      setInput('');        
+    }else{
+      console.error('Websocket is not open');
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+
+    if (selectedFile && selectedFile.type.startsWith('image/')){
+      const reader = new FileReader();
+      reader.onload = function(event){
+        setSelectedImage(event.target.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    }else{
+      setSelectedImage(null);
     }
   }
-
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -231,9 +249,9 @@ function TeamDetails() {
           </div>
             }
             <div className={`rounded p-2 ${
-                message.user_id === userId
+                message.user_id === userId && (message.message 
                   ? "bg-[#D9D9D9] ml-auto rounded-lg rounded-tr-none mr-8 self-message"
-                  : "bg-[#4D989D] mr-auto rounded-lg rounded-tl-none ml-8 other-message"
+                  : "bg-[#4D989D] mr-auto rounded-lg rounded-tl-none ml-8 other-message")
               }`}
               style={{
                 justifySelf: message.user_id === userId ? 'flex-end' : 'flex-start',
@@ -242,6 +260,23 @@ function TeamDetails() {
                 maxWidth: `${maxWidth}px`,
                 position: 'relative',
               }}><div className="mt-1">{message.message}</div></div>
+              {message.file && (
+              <div>
+                {message.file.startsWith('data:image/') ?(
+                  <p>{`${message.file.split('/').pop()}`}</p>
+                ) : (
+                  message.file.endsWith('.png') ||
+                  message.file.endsWith('.jpg') ||
+                  message.file.endsWith('.jpeg') ||
+                  message.file.endsWith('.gif') ? (
+                    <img src={`${backendUrl}${message.file}`} alt={`${message.file.split('/').pop()}`} className="text-black w-64 h-44"/>
+                  ) : (
+                    <a target="blank" href={`${backendUrl}${message.file}`} download={`${message.file.split('/').pop()}`} className="text-black">{`${message.file.split('/').pop()}`}</a>
+                  )
+                )
+                }
+              </div>
+              )}
           </div>
         ))}
         <div ref={messagesEndRef} />
@@ -262,6 +297,7 @@ function TeamDetails() {
             placeholder="Type a message..."
             className="w-full p-3 pl-9 bg-[#DBDBDB] border-none rounded-full focus:outline-none"
           />
+          
           <div className="absolute right-6 top-1/2 transform -translate-y-1/2 cursor-pointer">
             <label htmlFor="fileInput">
               <FontAwesomeIcon icon={faPaperclip} size="lg" className="text-gray-700 hover:text-gray-900" />
@@ -304,3 +340,23 @@ function TeamDetails() {
 }
 
 export default TeamDetails;
+
+
+
+// function handleFileUpload(file) {
+//   const reader = new FileReader();
+//   reader.onload = function(event) {
+//       const base64File = event.target.result.split(',')[1];  // Extract base64 part
+//       const fileName = file.name;
+
+//       const message = {
+//           sender: senderId,
+//           file: base64File,
+//           file_name: fileName
+//       };
+
+//       // Send the message over WebSocket
+//       websocket.send(JSON.stringify(message));
+//   };
+//   reader.readAsDataURL(file);  // Read file as base64
+// }

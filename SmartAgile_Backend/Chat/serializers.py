@@ -30,8 +30,16 @@ class MessageSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Message
-        fields = ['id', 'chatroom', 'sender', 'message', 'sent_at',  'user_id', 'username', 'user_image']
+        fields = ['id', 'chatroom', 'sender', 'message', 'file', 'sent_at',  'user_id', 'username', 'user_image']
         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']
+
+    def validate_file(self, value):
+        if value:
+            valid_formats = ['pdf', 'doc', 'docx', 'txt', 'xls', 'png', 'jpg', 'jpeg', 'gif']
+            file_extension = value.name.split('.')[-1].lower()
+            if file_extension not in valid_formats:
+                raise serializers.ValidationError('Invalid file format, Supported formats: PDF, DOC, DOCX, TXT, PNG, JPG, JPEG, GIF')
+        return value
 
 class MessageViewSerializer(serializers.ModelSerializer):
 
@@ -68,5 +76,5 @@ class MessageViewSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Message
-        fields = ['id', 'chatroom', 'sender', 'message', 'sent_at',  'user_id', 'username', 'user_image']
+        fields = ['id', 'chatroom', 'sender', 'message', 'file', 'sent_at',  'user_id', 'username', 'user_image']
         read_only_fields = ['sent_at', 'user_id', 'username', 'user_image']

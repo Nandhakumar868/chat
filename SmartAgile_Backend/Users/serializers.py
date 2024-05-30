@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User, UserProfile
 from rest_framework.exceptions import ValidationError
+from django.core.files.base import ContentFile
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
